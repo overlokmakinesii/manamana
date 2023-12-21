@@ -164,6 +164,12 @@
 #endif
 
 //////////////////////////////////////////////////////////////////////////////
+// // NOZZLE_POINTING gr
+// #ifndef MODE_NOZZLEPOINTING_ENABLED
+// # define MODE_NOZZLEPOINTING_ENABLED ENABLED
+// #endif
+
+//////////////////////////////////////////////////////////////////////////////
 // Brake mode - bring vehicle to stop
 #ifndef MODE_BRAKE_ENABLED
 # define MODE_BRAKE_ENABLED ENABLED

@@ -1,0 +1,24 @@
+# README Documentation
+
+## Introduction
+This document serves as a comprehensive guide to the recent changes implemented in the waypoint handling system during the automode operation. These changes are specifically oriented towards enhancing pilot control over waypoint altitude in auto mode.
+
+## Changes Overview
+- **Primary Change**: Modification of waypoint altitude control during automode.
+- **Key Feature**: Integration of pilot's throttle input to influence waypoint altitude.
+
+## Detailed Description
+### Waypoint Altitude Control in Auto Mode
+- **Functionality**: The system now takes into account the throttle input from the pilot. This input directly affects the altitude of the waypoints during the auto mode operation.
+- **Control Mechanism**: The altitude control is governed by a squared function of the throttle input. This approach has been adopted to provide a balanced and responsive control mechanism.
+
+### Characteristics of the Control Mechanism
+- **Precision Control with Small Throttle Input**: Lower throttle values result in a more refined and precise altitude adjustment. This allows for subtle and careful changes to the waypoint altitude, which is particularly useful in scenarios requiring fine-tuning and detailed navigation.
+- **Aggressive Altitude Changes with Higher Throttle Input**: Larger throttle inputs lead to more aggressive changes in altitude. This feature enables rapid altitude adjustments, which can be crucial in situations demanding quick response and significant altitude modifications.
+
+## Use Cases
+- **Fine-Tuning Waypoint Altitude**: The new control mechanism is ideal for scenarios where precise altitude adjustments are necessary, such as navigating through complex terrains or during detailed surveying tasks.
+- **Quick Altitude Adjustments**: In situations where rapid altitude changes are required, such as avoiding obstacles or responding to sudden environmental changes, the new system proves highly effective.
+
+## Conclusion
+The integration of pilot's throttle input into the waypoint altitude control during automode marks a significant enhancement in the system's functionality. By providing a responsive and versatile control mechanism, it allows pilots to have a more nuanced and powerful control over the flight path, especially in terms of altitude adjustments.

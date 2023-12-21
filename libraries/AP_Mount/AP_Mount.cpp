@@ -2,6 +2,10 @@
 #include <AP_Param/AP_Param.h>
 #include "AP_Mount.h"
 
+// #include "ArduCopter/Copter.h" 
+// #include <AP_GPS/AP_GPS.h>
+// #include <AP_Mission/AP_Mission.h>
+
 #if HAL_MOUNT_ENABLED
 
 #include "AP_Mount_Backend.h"
@@ -273,6 +277,67 @@ void AP_Mount::set_angle_target(uint8_t instance, float roll_deg, float pitch_de
     // send command to backend
     backend->set_angle_target(roll_deg, pitch_deg, yaw_deg, yaw_is_earth_frame);
 }
+
+// void AP_Mount::set_angle_target_to_waypoint_edited(uint8_t instance, float roll_deg, float pitch_deg, float yaw_deg, bool yaw_is_earth_frame)
+// {
+//     auto *backend = get_instance(instance);
+//     if (backend == nullptr) {
+//         return;
+//     }
+
+//     AP_GPS &gps = AP::gps();
+//     AP_AHRS &ahrs = AP::ahrs();
+
+//     if (gps.status() < AP_GPS::GPS_OK_FIX_3D) {
+//         // Handle the case where GPS fix is not good enough
+//         return;
+//     }
+//     Location current_location = gps.location();
+//     const Matrix3f &attitude = ahrs.get_rotation_body_to_ned();
+
+//     float roll_deg, pitch_deg, yaw_deg;
+
+//     AP_Mission *mission = AP::mission();
+
+// if (mission != nullptr) {
+//     AP_Mission::Mission_Command current_cmd;
+//     if (mission->get_next_nav_cmd(mission->get_current_nav_index(), current_cmd)) {
+//         Location target_waypoint = current_cmd.content.location;
+//         // Now you can use target_waypoint.lat and target_waypoint.lng
+
+//             float dLat = (target_waypoint.lat - current_location.lat) * 1.0e-7f; // convert from int32_t to float in degrees
+//             float dLon = (target_waypoint.lng - current_location.lng) * 1.0e-7f;
+
+//             float a = sinf(dLat/2) * sinf(dLat/2) +
+//                 cosf(target_waypoint.lat) * cosf(current_location.lat) * 
+//                 sinf(dLon/2) * sinf(dLon/2);
+//             float c = 2 * atan2f(sqrtf(a), sqrtf(1-a));
+//             float distance_haversine = 6371.0f * c;
+
+//             float y = sinf(dLon) * cosf(current_location.lat);
+//             float x = cosf(target_waypoint.lat) * sinf(current_location.lat) - 
+//                 sinf(target_waypoint.lat) * cosf(current_location.lat) * cosf(dLon);
+//             float brng = atan2f(y, x);
+
+//             float bearing_calculated = fmodf((degrees(brng) + 360), 360);
+
+//             float bearingRad = radians(bearing_calculated);
+//             float x_direction = distance_haversine * sinf(bearingRad); // East-West component
+//             float y_direction = distance_haversine * cosf(bearingRad); // North-South component
+
+//             float z_direction = 2;
+
+//             float xz_angle = atan2f(z_direction, x_direction); // Angle in the xz-plane
+//             float yz_angle = atan2f(z_direction, y_direction); // Angle in the yz-plane
+
+//             // Calculate gimbal angles
+//             pitch_deg = degrees(xz_angle);
+//             yaw_deg = degrees(yz_angle);
+//     }
+// }
+//     // send command to backend
+//     backend->set_angle_target(roll_deg, pitch_deg, yaw_deg, yaw_is_earth_frame);
+// }
 
 // sets rate target in deg/s
 // yaw_lock should be true if the yaw rate is earth-frame, false if body-frame (e.g. rotates with body of vehicle)

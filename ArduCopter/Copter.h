@@ -212,6 +212,7 @@ public:
     friend class ModeAcro_Heli;
     friend class ModeAltHold;
     friend class ModeAuto;
+    // friend class ModeNozzlePointing;
     friend class ModeAutoTune;
     friend class ModeAvoidADSB;
     friend class ModeBrake;
@@ -979,6 +980,9 @@ private:
 #if MODE_AUTO_ENABLED == ENABLED
     ModeAuto mode_auto;
 #endif
+// #if MODE_NOZZLEPOINTING_ENABLED == ENABLED
+//     ModeNozzlePointing mode_nozzlepointing;
+// #endif
 #if AUTOTUNE_ENABLED == ENABLED
     ModeAutoTune mode_autotune;
 #endif

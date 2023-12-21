@@ -972,6 +972,16 @@ void ModeAuto::takeoff_run()
 
 void ModeAuto::wp_run()
 {
+    // get the current location
+    Location roi_location_gr = copter.current_loc;
+
+    // get the waypoint destination location
+    if (!wp_nav->get_wp_destination_loc(roi_location_gr)) {
+        // this should never happen
+        INTERNAL_ERROR(AP_InternalError::error_t::flow_of_control);
+        return;
+    }
+
     // safety checks
     if (is_disarmed_or_landed()) {
         make_safe_ground_handling();
@@ -983,6 +993,9 @@ void ModeAuto::wp_run()
 
     // run waypoint controller
     copter.failsafe_terrain_set_status(wp_nav->update_wpnav());
+
+    // set ROI to waypoint location
+    auto_yaw.set_roi(roi_location_gr);
 
     // Get pilot's desired climb rate from throttle stick input (like in AltHold)
     float pilot_throttle_input = channel_throttle->get_control_in();
@@ -1495,6 +1508,8 @@ void ModeAuto::do_nav_wp(const AP_Mission::Mission_Command& cmd)
     loiter_time = 0;
     // this is the delay, stored in seconds
     loiter_time_max = cmd.p1;
+
+    // auto_yaw.set_roi(target_loc)
 
     // set next destination if necessary
     if (!set_next_wp(cmd, target_loc)) {
