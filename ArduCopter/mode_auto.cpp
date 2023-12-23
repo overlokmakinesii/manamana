@@ -995,7 +995,8 @@ void ModeAuto::wp_run()
     copter.failsafe_terrain_set_status(wp_nav->update_wpnav());
 
     // set ROI to waypoint location
-    auto_yaw.set_roi(roi_location_gr);
+    // auto_yaw.set_roi(roi_location_gr);
+    copter.camera_mount.set_roi_target(roi_location_gr);
 
     // Get pilot's desired climb rate from throttle stick input (like in AltHold)
     float pilot_throttle_input = channel_throttle->get_control_in();
