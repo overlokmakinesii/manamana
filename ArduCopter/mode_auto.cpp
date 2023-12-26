@@ -983,14 +983,7 @@ void ModeAuto::wp_run()
     }
 
     // reduce the altitude by 2m (200cm)
-    int32_t current_altitude_cm;
-    Location::AltFrame current_frame = Location::AltFrame::ABOVE_ORIGIN; // replace with the current frame
-
-    if (roi_location_gr.get_alt_cm(current_frame, current_altitude_cm)) {
-        roi_location_gr.set_alt_cm(current_altitude_cm - 200, current_frame);
-    } else {
-        // handle error: failed to get altitude
-    }
+    roi_location_gr.alt -= 200;
 
     // safety checks
     if (is_disarmed_or_landed()) {
