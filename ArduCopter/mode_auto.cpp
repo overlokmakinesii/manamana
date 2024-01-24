@@ -972,9 +972,6 @@ void ModeAuto::takeoff_run()
 
 void ModeAuto::wp_run()
 {
-    // get the current location
-    Location roi_location_gr = copter.current_loc;
-
     // get the waypoint destination location
     if (!wp_nav->get_wp_destination_loc(roi_location_gr)) {
         // this should never happen
@@ -982,8 +979,10 @@ void ModeAuto::wp_run()
         return;
     }
 
-    // reduce the altitude by 2m (200cm)
-    roi_location_gr.alt -= 200;
+    // reduce the altitude by rangefinder value or 200cm if no rangefinder is available
+    if (copter.rangefinder_state.enabled && copter.rangefinder_state.alt_cm > 0)
+        roi_location_gr.alt -= copter.rangefinder_state.alt_cm;
+    else roi_location_gr.alt -= 200;
 
     // safety checks
     if (is_disarmed_or_landed()) {
@@ -998,8 +997,24 @@ void ModeAuto::wp_run()
     copter.failsafe_terrain_set_status(wp_nav->update_wpnav());
 
     // set ROI to waypoint location
-    // auto_yaw.set_roi(roi_location_gr);
-    copter.camera_mount.set_roi_target(roi_location_gr);
+    if (prev_roi_location_gr.lat != roi_location_gr.lat || prev_roi_location_gr.lng != roi_location_gr.lng) {
+
+        // If distance is less than the other waypoint, change ROI
+        if (copter.current_loc.get_distance(roi_location_gr) < copter.current_loc.get_distance(prev_roi_location_gr)) {
+            // Change ROI
+            copter.camera_mount.set_roi_target(roi_location_gr);
+            prev_roi_location_gr = roi_location_gr;
+        }
+    }
+    
+    if (copter.current_loc.get_distance(roi_location_gr) < 5.0f || copter.current_loc.get_distance(prev_roi_location_gr) < 5.0f) {
+            // start sprayer
+                copter.sprayer.run(true);
+        }
+        else {
+            // stop sprayer
+                copter.sprayer.run(false);
+        } 
 
     // Get pilot's desired climb rate from throttle stick input (like in AltHold)
     float pilot_throttle_input = channel_throttle->get_control_in();

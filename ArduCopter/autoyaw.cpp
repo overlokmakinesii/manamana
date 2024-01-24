@@ -176,7 +176,7 @@ void Mode::AutoYaw::set_roi(const Location &roi_location)
         //      3: point at a location given by alt, lon, lat parameters
         //      4: point at a target given a target id (can't be implemented)
 #else
-        // if we have no camera mount aim the quad at the location
+        if we have no camera mount aim the quad at the location
         if (roi_location.get_vector_from_origin_NEU(roi)) {
             auto_yaw.set_mode(Mode::ROI);
         }

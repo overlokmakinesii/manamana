@@ -529,6 +529,9 @@ protected:
     int32_t wp_bearing() const override;
     float crosstrack_error() const override { return wp_nav->crosstrack_error();}
     bool get_wp(Location &loc) const override;
+    
+    Location prev_roi_location_gr;
+    Location roi_location_gr;
 
 private:
 
@@ -787,6 +790,9 @@ protected:
     int32_t wp_bearing() const override;
     float crosstrack_error() const override { return wp_nav->crosstrack_error();}
     bool get_wp(Location &loc) const override;
+
+    Location prev_roi_location_gr;
+    Location roi_location_gr;
 
 private:
 

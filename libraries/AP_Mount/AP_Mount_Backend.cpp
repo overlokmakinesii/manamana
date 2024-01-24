@@ -514,6 +514,41 @@ bool AP_Mount_Backend::get_angle_target_to_location(const Location &loc, MountTa
     return true;
 }
 
+bool AP_Mount_Backend::get_angle_target_to_location_gr(const Location &loc, MountTarget& angle_rad) const
+{
+    // exit immediately if vehicle's location is unavailable
+    Location current_loc;
+    if (!AP::ahrs().get_location(current_loc)) {
+        return false;
+    }
+
+    // exit immediate if location is invalid
+    if (!loc.initialised()) {
+        return false;
+    }
+
+    const float GPS_vector_x = Location::diff_longitude(loc.lng, current_loc.lng)*cosf(ToRad((current_loc.lat + loc.lat) * 0.00000005f)) * 0.01113195f;
+    const float GPS_vector_y = (loc.lat - current_loc.lat) * 0.01113195f;
+    int32_t target_alt_cm = 0;
+    if (!loc.get_alt_cm(Location::AltFrame::ABOVE_HOME, target_alt_cm)) {
+        return false;
+    }
+    int32_t current_alt_cm = 0;
+    if (!current_loc.get_alt_cm(Location::AltFrame::ABOVE_HOME, current_alt_cm)) {
+        return false;
+    }
+    float GPS_vector_z = target_alt_cm - current_alt_cm;
+    float target_distance = 100.0f*norm(GPS_vector_x-0.5, GPS_vector_y-0.3);      // Careful , centimeters here locally. Baro/alt is in cm, lat/lon is in meters.
+
+    // calculate roll, pitch, yaw angles
+    angle_rad.roll = 0;
+    angle_rad.pitch = atan2f(GPS_vector_z, target_distance);
+    angle_rad.yaw = atan2f(GPS_vector_x, GPS_vector_y);
+    angle_rad.yaw_is_ef = true;
+
+    return true;
+}
+
 // get angle targets (in radians) to ROI location
 // returns true on success, false on failure
 bool AP_Mount_Backend::get_angle_target_to_roi(MountTarget& angle_rad) const
@@ -521,7 +556,7 @@ bool AP_Mount_Backend::get_angle_target_to_roi(MountTarget& angle_rad) const
     if (!_roi_target_set) {
         return false;
     }
-    return get_angle_target_to_location(_roi_target, angle_rad);
+    return get_angle_target_to_location_gr(_roi_target, angle_rad);
 }
 
 // return body-frame yaw angle from a mount target

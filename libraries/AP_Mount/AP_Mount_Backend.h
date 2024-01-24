@@ -230,6 +230,8 @@ protected:
 
     // get angle targets (in radians) to a Location
     // returns true on success, false on failure
+    bool get_angle_target_to_location_gr(const Location &loc, MountTarget& angle_rad) const WARN_IF_UNUSED;
+
     bool get_angle_target_to_location(const Location &loc, MountTarget& angle_rad) const WARN_IF_UNUSED;
 
     // get angle targets (in radians) to ROI location
