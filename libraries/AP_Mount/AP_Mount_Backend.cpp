@@ -526,6 +526,12 @@ bool AP_Mount_Backend::get_angle_target_to_location_gr(const Location &loc, Moun
     if (!loc.initialised()) {
         return false;
     }
+    
+    const auto &ahrs = AP::ahrs();
+    const float x_offsetting = -0.5*ahrs.cos_yaw() + 0.3*ahrs.sin_yaw();;
+    const float y_offsetting = -0.5*ahrs.sin_yaw() - 0.3*ahrs.cos_yaw();;
+    // copter.rotate_body_frame_to_NE(x_offsetting, y_offsetting);
+    // -5.61195
 
     const float GPS_vector_x = Location::diff_longitude(loc.lng, current_loc.lng)*cosf(ToRad((current_loc.lat + loc.lat) * 0.00000005f)) * 0.01113195f;
     const float GPS_vector_y = (loc.lat - current_loc.lat) * 0.01113195f;
@@ -538,7 +544,7 @@ bool AP_Mount_Backend::get_angle_target_to_location_gr(const Location &loc, Moun
         return false;
     }
     float GPS_vector_z = target_alt_cm - current_alt_cm;
-    float target_distance = 100.0f*norm(GPS_vector_x-0.5, GPS_vector_y-0.3);      // Careful , centimeters here locally. Baro/alt is in cm, lat/lon is in meters.
+    float target_distance = 100.0f*norm(GPS_vector_x+x_offsetting, GPS_vector_y+y_offsetting);      // Careful , centimeters here locally. Baro/alt is in cm, lat/lon is in meters.
 
     // calculate roll, pitch, yaw angles
     angle_rad.roll = 0;
@@ -556,7 +562,7 @@ bool AP_Mount_Backend::get_angle_target_to_roi(MountTarget& angle_rad) const
     if (!_roi_target_set) {
         return false;
     }
-    return get_angle_target_to_location_gr(_roi_target, angle_rad);
+    return get_angle_target_to_location(_roi_target, angle_rad);
 }
 
 // return body-frame yaw angle from a mount target

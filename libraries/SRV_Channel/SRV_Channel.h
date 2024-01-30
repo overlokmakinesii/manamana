@@ -465,6 +465,9 @@ public:
     static void move_servo(SRV_Channel::Aux_servo_function_t function,
                            int16_t value, int16_t angle_min, int16_t angle_max);
 
+    static void move_servo_gr(SRV_Channel::Aux_servo_function_t function,
+                           int16_t value, int16_t angle_min, int16_t angle_max);
+
     // assign and enable auxiliary channels
     static void enable_aux_servos(void);
 

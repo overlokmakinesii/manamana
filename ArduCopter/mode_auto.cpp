@@ -1007,7 +1007,7 @@ void ModeAuto::wp_run()
         }
     }
     
-    if (copter.current_loc.get_distance(roi_location_gr) < 5.0f || copter.current_loc.get_distance(prev_roi_location_gr) < 5.0f) {
+    if (copter.current_loc.get_distance(roi_location_gr) < 1.0f || copter.current_loc.get_distance(prev_roi_location_gr) < 1.0f) {
             // start sprayer
                 copter.sprayer.run(true);
         }

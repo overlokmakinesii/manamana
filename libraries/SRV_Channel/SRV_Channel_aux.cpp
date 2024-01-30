@@ -526,6 +526,29 @@ SRV_Channels::move_servo(SRV_Channel::Aux_servo_function_t function,
     }
 }
 
+//this is for testing the angle and pwm output of a servo
+void
+SRV_Channels::move_servo_gr(SRV_Channel::Aux_servo_function_t function,
+                         int16_t value, int16_t angle_min, int16_t angle_max)
+{
+    if (!function_assigned(function)) {
+        return;
+    }
+    if (angle_max <= angle_min) {
+        return;
+    }
+    float v = float(value + 1800) / float(3600);
+    v = constrain_float(v, 0.0f, 1.0f);
+    for (uint8_t i = 0; i < NUM_SERVO_CHANNELS; i++) {
+        SRV_Channel &c = channels[i];
+        if (c.function == function) {
+            float v2 = c.get_reversed()? (1-v) : v;
+            uint16_t pwm = c.servo_min + v2 * (c.servo_max - c.servo_min);
+            c.set_output_pwm(pwm);
+        }
+    }
+}
+
 /*
   set the default channel an auxiliary output function should be on
  */
