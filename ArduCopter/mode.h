@@ -533,6 +533,11 @@ protected:
     Location prev_roi_location_gr;
     Location roi_location_gr;
 
+    float distance_between_copter_and_wp;
+    float distance_between_copter_and_wp_prev;
+
+    bool isCloseToAnyWaypoint;
+
 private:
 
     enum class Options : int32_t {

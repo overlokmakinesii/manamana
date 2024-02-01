@@ -1,6 +1,6 @@
 #include <AP_HAL/AP_HAL.h>
 #include "AC_WPNav.h"
-
+#include "/home/solid/Downloads/Extra_Work/Phan/ardupilot/ardupilot/ArduCopter/shared_throttle.h"
 extern const AP_HAL::HAL& hal;
 
 // maximum velocities and accelerations
@@ -588,12 +588,44 @@ int32_t AC_WPNav::get_wp_bearing_to_destination() const
 bool AC_WPNav::update_wpnav()
 {
     // check for changes in speed parameter values
-    if (_check_wp_speed_change) {
+    if (true) {
         if (!is_equal(_wp_speed_cms.get(), _last_wp_speed_cms)) {
             set_speed_xy(_wp_speed_cms);
             _last_wp_speed_cms = _wp_speed_cms;
         }
     }
+    if (!is_equal(_wp_speed_up_cms.get(), _last_wp_speed_up_cms)) {
+        set_speed_up(_wp_speed_up_cms);
+        _last_wp_speed_up_cms = _wp_speed_up_cms;
+    }
+    if (!is_equal(_wp_speed_down_cms.get(), _last_wp_speed_down_cms)) {
+        set_speed_down(_wp_speed_down_cms);
+        _last_wp_speed_down_cms = _wp_speed_down_cms;
+    }
+
+    // advance the target if necessary
+    bool ret = true;
+    if (!advance_wp_target_along_track(_pos_control.get_dt())) {
+        // To-Do: handle inability to advance along track (probably because of missing terrain data)
+        ret = false;
+    }
+
+    _pos_control.update_xy_controller();
+
+    _wp_last_update = AP_HAL::millis();
+
+    return ret;
+}
+
+bool AC_WPNav::update_wpnav_gr()
+{
+    // check for changes in speed parameter values
+    // if (true) {
+        if (!is_equal(_wp_speed_cms.get() * sharedData.speed_xy, _last_wp_speed_cms)) {
+            set_speed_xy((_wp_speed_cms * sharedData.speed_xy) < 0 ? 0.1 : (_wp_speed_cms * sharedData.speed_xy));
+            _last_wp_speed_cms = _wp_speed_cms * sharedData.speed_xy;
+        }
+    // }
     if (!is_equal(_wp_speed_up_cms.get(), _last_wp_speed_up_cms)) {
         set_speed_up(_wp_speed_up_cms);
         _last_wp_speed_up_cms = _wp_speed_up_cms;

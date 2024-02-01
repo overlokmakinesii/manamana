@@ -24,6 +24,7 @@
 bool ModeAuto::init(bool ignore_checks)
 {
     sharedData.throttle_input_total = 0.0; // Reset when entering auto mode
+    sharedData.speed_xy = 0.0; // Reset when entering auto mode
     auto_RTL = false;
     if (mission.num_commands() > 1 || ignore_checks) {
         // reject switching to auto mode if landed with motors armed but first command is not a takeoff (reduce chance of flips)
@@ -994,27 +995,32 @@ void ModeAuto::wp_run()
     motors->set_desired_spool_state(AP_Motors::DesiredSpoolState::THROTTLE_UNLIMITED);
 
     // run waypoint controller
-    copter.failsafe_terrain_set_status(wp_nav->update_wpnav());
+    copter.failsafe_terrain_set_status(wp_nav->update_wpnav_gr());
+
+    distance_between_copter_and_wp = copter.current_loc.get_distance(roi_location_gr);
+    distance_between_copter_and_wp_prev = copter.current_loc.get_distance(prev_roi_location_gr);
 
     // set ROI to waypoint location
     if (prev_roi_location_gr.lat != roi_location_gr.lat || prev_roi_location_gr.lng != roi_location_gr.lng) {
 
         // If distance is less than the other waypoint, change ROI
-        if (copter.current_loc.get_distance(roi_location_gr) < copter.current_loc.get_distance(prev_roi_location_gr)) {
+        if (distance_between_copter_and_wp < distance_between_copter_and_wp_prev) {
             // Change ROI
             copter.camera_mount.set_roi_target(roi_location_gr);
             prev_roi_location_gr = roi_location_gr;
         }
     }
-    
-    if (copter.current_loc.get_distance(roi_location_gr) < 1.0f || copter.current_loc.get_distance(prev_roi_location_gr) < 1.0f) {
-            // start sprayer
-                copter.sprayer.run(true);
-        }
-        else {
-            // stop sprayer
-                copter.sprayer.run(false);
-        } 
+
+    isCloseToAnyWaypoint = distance_between_copter_and_wp < 1.0f || distance_between_copter_and_wp_prev < 1.0f;
+    copter.sprayer.run(isCloseToAnyWaypoint);
+
+    sharedData.speed_xy = (distance_between_copter_and_wp < 2.0f || distance_between_copter_and_wp_prev < 2.0f) ? 0.1f : 1.0f;
+
+    // wp_speed control
+    // float pilot_speed_input = channel_pitch->get_control_in();
+    // sharedData.speed_xy += pilot_speed_input/-4.50f; // making it -1 to 1
+    // // copter.set_desired_speed(sharedData.speed_xy + pilot_speed_input*sharedData.speed_xy);
+    // // set_speed_xy(pilot_speed_input*sharedData.speed_xy);
 
     // Get pilot's desired climb rate from throttle stick input (like in AltHold)
     float pilot_throttle_input = channel_throttle->get_control_in();
@@ -1904,6 +1910,7 @@ void ModeAuto::do_change_speed(const AP_Mission::Mission_Command& cmd)
             copter.wp_nav->set_speed_down(cmd.content.speed.target_ms * 100.0f);
         } else {
             copter.wp_nav->set_speed_xy(cmd.content.speed.target_ms * 100.0f);
+            sharedData.speed_xy = cmd.content.speed.target_ms * 100.0f;
         }
     }
 }

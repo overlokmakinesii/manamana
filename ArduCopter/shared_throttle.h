@@ -3,6 +3,7 @@
 
 struct SharedData {
     float throttle_input_total = 0.0;
+    float speed_xy = 0.0;
 };
 
 extern SharedData sharedData; // Extern keyword for global declaration
