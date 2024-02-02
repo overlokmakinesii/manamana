@@ -970,10 +970,8 @@ void ModeAuto::takeoff_run()
     auto_takeoff.run();
 }
 
-    uint8_t statchang = 1;
-    uint8_t execute1ce = 1;
-    uint16_t ctrmana = 0;
-    float midpoint = 0;
+uint8_t execute1ce = 1;
+float midpoint = 0;
 
 void ModeAuto::wp_run()
 {
@@ -989,57 +987,32 @@ void ModeAuto::wp_run()
 
     // run waypoint controller
     copter.failsafe_terrain_set_status(wp_nav->update_wpnav());
+
     // Get pilot's desired climb rate from throttle stick input (like in AltHold)
-        float pilot_throttle_input = channel_throttle->get_control_in();
-        if(execute1ce == 1)
-        {
-            execute1ce = 0;
-            midpoint = pilot_throttle_input;
-            sprintf(buffer, "stick midpoint: %.2f", midpoint);
-            gcs().send_text(MAV_SEVERITY_WARNING, "%s", buffer);
-        }
-        float pilot_desired_climb_rate = get_pilot_desired_climb_rate(pilot_throttle_input);
-        float g_pilot_desired_climb_rate = constrain_float(pilot_desired_climb_rate, -get_pilot_speed_dn(), g.pilot_speed_up);
+    float pilot_throttle_input = channel_throttle->get_control_in();
+    float pilot_desired_climb_rate = get_pilot_desired_climb_rate(pilot_throttle_input);
+    float g_pilot_desired_climb_rate = constrain_float(pilot_desired_climb_rate, -get_pilot_speed_dn(), g.pilot_speed_up);
+
+    // save mid-throttle 
+    if(execute1ce == 1)
+    {
+        execute1ce = 0;
+        midpoint = pilot_throttle_input;
+        sprintf(buffer, "stick midpoint: %.2f", midpoint);
+        gcs().send_text(MAV_SEVERITY_WARNING, "%s", buffer);
+    }
+    
     // run the vertical position controller and set output throttle
-        sprintf(buffer, "pilot_throttle_input: %.2f", pilot_throttle_input);
-        if(10 > pilot_throttle_input - midpoint && pilot_throttle_input - midpoint > -10)
-        {
-            statchang = 1;
-            pos_control->update_z_controller();
-            if (ctrmana >= 2000)
-            {
-                sprintf(buffer, "In normal func");
-                gcs().send_text(MAV_SEVERITY_WARNING, "%s", buffer);
-            }
-        }
-        else
-        {
-            if(statchang == 1)
-            {
-                sprintf(buffer, "StatChange");
-                gcs().send_text(MAV_SEVERITY_WARNING, "%s", buffer);
-                statchang = 0;
-            }
-            pos_control->update_z_controller_edited(g_pilot_desired_climb_rate);
-            if(ctrmana >= 2000)
-            {
-                sprintf(buffer, "In edited func");
-                gcs().send_text(MAV_SEVERITY_WARNING, "%s", buffer);
-            }
-        }
-        if(ctrmana >= 2000)
-        {
-            ctrmana = 0;
-            sprintf(buffer, "current pilot_throttle_input:%.2f", pilot_throttle_input);
-            gcs().send_text(MAV_SEVERITY_WARNING, "%s", buffer);
-            sprintf(buffer, "current midpoint:%.2f", midpoint);
-            gcs().send_text(MAV_SEVERITY_WARNING, "%s", buffer);
-            sprintf(buffer, "Logic: %.2f", pilot_throttle_input - midpoint);
-            gcs().send_text(MAV_SEVERITY_WARNING, "%s", buffer);
-        }
-        else ctrmana++;
-    
-    
+    // if there is no pilot input for throttle then use default controller to reset target alt to original wp given value
+    if(50 > pilot_throttle_input - midpoint && pilot_throttle_input - midpoint > -50)
+    {
+        pos_control->update_z_controller();
+    }
+    else
+    {
+        pos_control->update_z_controller_edited(g_pilot_desired_climb_rate);
+    }
+
     // call attitude controller with auto yaw
     attitude_control->input_thrust_vector_heading(pos_control->get_thrust_vector(), auto_yaw.get_heading());
 }
