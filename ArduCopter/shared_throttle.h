@@ -1,4 +1,4 @@
-#ifndef SHARED_DATA_H
+#ifndef SHARED_DATA_H 
 #define SHARED_DATA_H
 
 struct SharedData {
